@@ -2,7 +2,7 @@
 
 **Epic:** 1 - Foundation & Admin Interface
 **Priority:** P0 - Critical Path
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -93,10 +93,78 @@ security:
 
 ## Definition of Done
 
-- [ ] Admin entity created with proper fields
-- [ ] UserInterface and PasswordAuthenticatedUserInterface implemented
-- [ ] Security firewall configured
-- [ ] Login page functional at /admin/login
-- [ ] Protected routes redirect to login
-- [ ] Logout works correctly
-- [ ] Migration created and applied
+- [x] Admin entity created with proper fields
+- [x] UserInterface and PasswordAuthenticatedUserInterface implemented
+- [x] Security firewall configured
+- [x] Login page functional at /admin/login
+- [x] Protected routes redirect to login
+- [x] Logout works correctly
+- [x] Migration created and applied
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+Claude Opus 4.5
+
+### File List
+- `src/Entity/Admin.php` - Admin entity with UserInterface
+- `src/Repository/AdminRepository.php` - Admin repository with PasswordUpgrader
+- `src/Controller/SecurityController.php` - Login/logout controller
+- `src/Controller/AdminController.php` - Admin dashboard controller
+- `templates/security/login.html.twig` - Login form template
+- `templates/admin/dashboard.html.twig` - Dashboard template
+- `config/packages/security.yaml` - Security firewall configuration
+- `migrations/Version20260110231211.php` - Database migration
+- `tests/Controller/SecurityControllerTest.php` - Authentication tests
+
+### Change Log
+- Created Admin entity with id, username (unique), password fields
+- Implemented UserInterface and PasswordAuthenticatedUserInterface
+- Created AdminRepository with PasswordUpgraderInterface
+- Configured security.yaml with admin firewall and form login
+- Created SecurityController with login/logout routes
+- Created login template with French labels and "Identifiants incorrects" error
+- Created AdminController with dashboard route
+- Created dashboard template with logout link
+- Generated and applied database migration
+- Created 5 tests for authentication flow (18 assertions)
+
+### Completion Notes
+- All 6 tests pass (including story 1.1 health test)
+- All linting passes (container, YAML, Twig)
+- Login page at /admin/login with username/password fields
+- Protected /admin routes redirect to login
+- Successful login redirects to /admin dashboard
+- Invalid credentials show "Identifiants incorrects" message
+- Logout at /admin/logout redirects to login page
+
+### DoD Checklist Validation
+
+**1. Requirements Met:**
+- [x] All 9 acceptance criteria implemented and tested
+
+**2. Coding Standards & Project Structure:**
+- [x] Follows Symfony conventions
+- [x] Security best practices (CSRF enabled, password hashing)
+- [x] No linter errors
+
+**3. Testing:**
+- [x] 5 authentication tests (login page, protected routes, invalid/valid login, logout)
+- [x] All 6 tests pass (18 assertions)
+
+**4. Functionality & Verification:**
+- [x] All routes verified via debug:router
+- [x] Authentication flow tested
+
+**5. Story Administration:**
+- [x] All DoD items checked
+- [x] Dev Agent Record completed
+
+**6. Dependencies, Build & Configuration:**
+- [x] Project builds and lints successfully
+- [x] Migration created and applied
+
+**Final Confirmation:**
+- [x] Story ready for review

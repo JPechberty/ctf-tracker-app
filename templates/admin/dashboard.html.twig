@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration - CTF Tracker{% endblock %}
+
+{% block body %}
+<div class="admin-dashboard">
+    <header>
+        <h1>Administration CTF Tracker</h1>
+        <div class="user-info">
+            Connecte en tant que : <strong>{{ app.user.username }}</strong>
+            <a href="{{ path('admin_logout') }}">Deconnexion</a>
+        </div>
+    </header>
+
+    <main>
+        <p>Bienvenue dans l'interface d'administration.</p>
+    </main>
+</div>
+
+<style>
+    .admin-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .admin-dashboard header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    .user-info a {
+        margin-left: 15px;
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
