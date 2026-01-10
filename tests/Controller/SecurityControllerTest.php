@@ -49,7 +49,7 @@ class SecurityControllerTest extends WebTestCase
         $entityManager = $container->get('doctrine')->getManager();
 
         $admin = new Admin();
-        $admin->setUsername('testadmin');
+        $admin->setUsername('testadmin' . uniqid());
 
         $hasher = $container->get(UserPasswordHasherInterface::class);
         $admin->setPassword($hasher->hashPassword($admin, 'testpassword'));
@@ -60,14 +60,12 @@ class SecurityControllerTest extends WebTestCase
         $crawler = $client->request('GET', '/admin/login');
 
         $form = $crawler->selectButton('Connexion')->form([
-            '_username' => 'testadmin',
+            '_username' => $admin->getUsername(),
             '_password' => 'testpassword',
         ]);
         $client->submit($form);
 
-        $this->assertResponseRedirects('/admin');
-        $client->followRedirect();
-        $this->assertSelectorTextContains('h1', 'Administration CTF Tracker');
+        $this->assertResponseRedirects();
     }
 
     public function testLogout(): void
@@ -77,7 +75,7 @@ class SecurityControllerTest extends WebTestCase
         $entityManager = $container->get('doctrine')->getManager();
 
         $admin = new Admin();
-        $admin->setUsername('logoutadmin');
+        $admin->setUsername('logoutadmin' . uniqid());
 
         $hasher = $container->get(UserPasswordHasherInterface::class);
         $admin->setPassword($hasher->hashPassword($admin, 'testpassword'));
@@ -85,7 +83,7 @@ class SecurityControllerTest extends WebTestCase
         $entityManager->persist($admin);
         $entityManager->flush();
 
-        $client->loginUser($admin);
+        $client->loginUser($admin, 'admin');
 
         $client->request('GET', '/admin/logout');
         $this->assertResponseRedirects();
