@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Challenge;
+use App\Entity\Flag;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -28,6 +29,7 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Challenges', 'fa fa-flag', Challenge::class);
+        yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Challenges', 'fa fa-trophy', Challenge::class);
+        yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Flags', 'fa fa-flag', Flag::class);
     }
 }

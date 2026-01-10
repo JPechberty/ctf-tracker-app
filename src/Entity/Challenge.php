@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ChallengeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -35,6 +37,20 @@ class Challenge
     #[ORM\Column]
     #[Assert\NotNull]
     private ?\DateTimeImmutable $endDate = null;
+
+    /** @var Collection<int, Flag> */
+    #[ORM\OneToMany(targetEntity: Flag::class, mappedBy: 'challenge', cascade: ['persist', 'remove'])]
+    private Collection $flags;
+
+    public function __construct()
+    {
+        $this->flags = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return $this->name ?? '';
+    }
 
     public function getId(): ?int
     {
@@ -115,6 +131,35 @@ class Challenge
     public function isEnded(): bool
     {
         return new \DateTimeImmutable() > $this->endDate;
+    }
+
+    /**
+     * @return Collection<int, Flag>
+     */
+    public function getFlags(): Collection
+    {
+        return $this->flags;
+    }
+
+    public function addFlag(Flag $flag): static
+    {
+        if (!$this->flags->contains($flag)) {
+            $this->flags->add($flag);
+            $flag->setChallenge($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFlag(Flag $flag): static
+    {
+        if ($this->flags->removeElement($flag)) {
+            if ($flag->getChallenge() === $this) {
+                $flag->setChallenge(null);
+            }
+        }
+
+        return $this;
     }
 
     #[Assert\Callback]
