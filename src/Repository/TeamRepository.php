@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Challenge;
 use App\Entity\Team;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -28,5 +29,18 @@ class TeamRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @return Team[]
+     */
+    public function findByChallengeSortedByScore(Challenge $challenge): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.challenge = :challenge')
+            ->setParameter('challenge', $challenge)
+            ->orderBy('t.score', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 }

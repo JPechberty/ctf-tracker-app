@@ -2,7 +2,7 @@
 
 **Epic:** 2 - Team Authentication & Dashboard
 **Priority:** P0 - Critical Path
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -139,11 +139,36 @@ public function dashboard(RankingService $rankingService): Response
 
 ## Definition of Done
 
-- [ ] Dashboard route at /dashboard with ROLE_TEAM protection
-- [ ] RankingService created and tested
-- [ ] TeamRepository.findByChallengeSortedByScore() works
-- [ ] Score card displays correctly
-- [ ] Rank card displays correctly
-- [ ] Ties handled (equal scores = same rank)
-- [ ] Logout button in header works
-- [ ] Layout matches wireframe E2
+- [x] Dashboard route at /dashboard with ROLE_TEAM protection
+- [x] RankingService created and tested
+- [x] TeamRepository.findByChallengeSortedByScore() works
+- [x] Score card displays correctly
+- [x] Rank card displays correctly
+- [x] Ties handled (equal scores = same rank)
+- [x] Logout button in header works
+- [x] Layout matches wireframe E2
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+Claude Opus 4.5
+
+### File List
+| File | Action |
+|------|--------|
+| src/Service/RankingService.php | Created |
+| src/Repository/TeamRepository.php | Modified |
+| src/Controller/DashboardController.php | Modified |
+| templates/dashboard/index.html.twig | Modified |
+| tests/Service/RankingServiceTest.php | Created |
+| tests/Controller/DashboardControllerTest.php | Created |
+
+### Change Log
+- Created RankingService with getTeamRank() method including tie handling
+- Added findByChallengeSortedByScore() method to TeamRepository
+- Updated DashboardController with ROLE_TEAM protection and RankingService injection
+- Redesigned dashboard template with score card, rank card, and logout button in header
+- Added unit tests for RankingService (5 tests covering ties, multiple teams, zero scores)
+- Added functional tests for DashboardController (8 tests covering auth, display, logout)
