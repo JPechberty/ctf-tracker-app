@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Admin;
 use App\Entity\Challenge;
 use App\Entity\Flag;
+use App\Entity\Team;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -53,6 +54,23 @@ class AppFixtures extends Fixture
             $flag->setPoints($flagData['points']);
             $flag->setChallenge($challenge);
             $manager->persist($flag);
+        }
+
+        // Teams
+        $teams = [
+            ['name' => 'Les Hackers', 'username' => 'team1', 'password' => 'team1pass'],
+            ['name' => 'Cyber Squad', 'username' => 'team2', 'password' => 'team2pass'],
+            ['name' => 'Binary Breakers', 'username' => 'team3', 'password' => 'team3pass'],
+        ];
+
+        foreach ($teams as $teamData) {
+            $team = new Team();
+            $team->setName($teamData['name']);
+            $team->setUsername($teamData['username']);
+            $team->setPassword($this->passwordHasher->hashPassword($team, $teamData['password']));
+            $team->setChallenge($challenge);
+            // score defaults to 0
+            $manager->persist($team);
         }
 
         $manager->flush();

@@ -259,4 +259,81 @@ class SecurityControllerTest extends WebTestCase
         $client->request('GET', '/admin');
         $this->assertResponseRedirects('/admin/login');
     }
+
+    // Story 2.5 - Fixture credential tests
+
+    public function testLoginWithFixtureTeam1Credentials(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $teamRepository = $entityManager->getRepository(Team::class);
+        $team = $teamRepository->findOneBy(['username' => 'team1']);
+
+        // Skip if fixtures not loaded
+        if ($team === null) {
+            $this->markTestSkipped('Fixtures not loaded - team1 not found');
+        }
+
+        $crawler = $client->request('GET', '/login');
+
+        $form = $crawler->selectButton('Se connecter')->form([
+            '_username' => 'team1',
+            '_password' => 'team1pass',
+        ]);
+        $client->submit($form);
+
+        $this->assertResponseRedirects('/dashboard');
+    }
+
+    public function testLoginWithFixtureTeam2Credentials(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $teamRepository = $entityManager->getRepository(Team::class);
+        $team = $teamRepository->findOneBy(['username' => 'team2']);
+
+        // Skip if fixtures not loaded
+        if ($team === null) {
+            $this->markTestSkipped('Fixtures not loaded - team2 not found');
+        }
+
+        $crawler = $client->request('GET', '/login');
+
+        $form = $crawler->selectButton('Se connecter')->form([
+            '_username' => 'team2',
+            '_password' => 'team2pass',
+        ]);
+        $client->submit($form);
+
+        $this->assertResponseRedirects('/dashboard');
+    }
+
+    public function testLoginWithFixtureTeam3Credentials(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $teamRepository = $entityManager->getRepository(Team::class);
+        $team = $teamRepository->findOneBy(['username' => 'team3']);
+
+        // Skip if fixtures not loaded
+        if ($team === null) {
+            $this->markTestSkipped('Fixtures not loaded - team3 not found');
+        }
+
+        $crawler = $client->request('GET', '/login');
+
+        $form = $crawler->selectButton('Se connecter')->form([
+            '_username' => 'team3',
+            '_password' => 'team3pass',
+        ]);
+        $client->submit($form);
+
+        $this->assertResponseRedirects('/dashboard');
+    }
 }
