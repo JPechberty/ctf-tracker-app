@@ -20,7 +20,7 @@ class Submission
     private ?Team $team = null;
 
     #[ORM\ManyToOne(inversedBy: 'submissions')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Flag $flag = null;
 
     #[ORM\Column(length: 255)]

@@ -3,6 +3,8 @@
 namespace App\Tests\Controller;
 
 use App\Entity\Challenge;
+use App\Entity\Flag;
+use App\Entity\Submission;
 use App\Entity\Team;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -237,7 +239,7 @@ class DashboardControllerTest extends WebTestCase
         $client->request('GET', '/dashboard');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('.text-muted', 'Aucun flag valide pour le moment');
+        $this->assertSelectorTextContains('.empty-flags-message', 'Aucun flag valide pour le moment');
     }
 
     public function testDashboardShowsFlagsCount(): void
@@ -286,5 +288,197 @@ class DashboardControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSelectorExists('a[href="/dashboard"]');
+    }
+
+    // Story 3.3 Tests - Flag Submission Form
+
+    public function testDashboardHasSubmissionForm(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+
+        // Check that SOUMETTRE UN FLAG card exists
+        $cardTitles = $crawler->filter('.card-title');
+        $found = false;
+        foreach ($cardTitles as $title) {
+            if (str_contains($title->textContent, 'SOUMETTRE UN FLAG')) {
+                $found = true;
+                break;
+            }
+        }
+        $this->assertTrue($found, 'SOUMETTRE UN FLAG card not found');
+        $this->assertSelectorExists('form input[name="flag"]');
+        $this->assertSelectorExists('form button[type="submit"]');
+    }
+
+    public function testDashboardShowsFormatHint(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('small.text-muted', 'Format attendu: DASH{...}');
+    }
+
+    public function testSuccessfulFlagSubmission(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+
+        $challenge = $this->createTestChallenge();
+
+        // Create a flag for the challenge
+        $flag = new Flag();
+        $flag->setName('Test Flag');
+        $flag->setValue('DASH{test123}');
+        $flag->setPoints(100);
+        $flag->setChallenge($challenge);
+        $em->persist($flag);
+        $em->flush();
+
+        $team = $this->createTestTeam($challenge, 0);
+        $teamId = $team->getId();
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        // Submit the correct flag
+        $form = $crawler->selectButton('Valider')->form();
+        $form['flag'] = 'DASH{test123}';
+        $client->submit($form);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('.alert-success', 'points');
+
+        // Verify team score was updated by checking the page content
+        $this->assertSelectorTextContains('.card-body', '100 pts');
+
+        // Verify input is cleared on success
+        $this->assertSelectorExists('input[name="flag"][value=""]');
+    }
+
+    public function testFailedFlagSubmission(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge, 0);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        // Submit an incorrect flag
+        $form = $crawler->selectButton('Valider')->form();
+        $form['flag'] = 'DASH{wrong}';
+        $client->submit($form);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert-danger');
+
+        // Verify input retains the submitted value
+        $this->assertSelectorExists('input[name="flag"][value="DASH{wrong}"]');
+    }
+
+    public function testSubmissionIsPersisted(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge);
+        $teamId = $team->getId();
+        $uniqueValue = 'DASH{persist_' . uniqid() . '}';
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        // Submit a flag with unique value
+        $form = $crawler->selectButton('Valider')->form();
+        $form['flag'] = $uniqueValue;
+        $client->submit($form);
+
+        $this->assertResponseIsSuccessful();
+
+        // Get fresh entity manager after the request
+        $em->clear();
+        $submissionRepo = $em->getRepository(Submission::class);
+        $submission = $submissionRepo->findOneBy(['submittedValue' => $uniqueValue]);
+        $this->assertNotNull($submission);
+        $this->assertEquals($teamId, $submission->getTeam()->getId());
+    }
+
+    public function testValidatedFlagAppearsInList(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+
+        $challenge = $this->createTestChallenge();
+
+        // Create a flag
+        $flag = new Flag();
+        $flag->setName('Visible Flag');
+        $flag->setValue('DASH{visible}');
+        $flag->setPoints(50);
+        $flag->setChallenge($challenge);
+        $em->persist($flag);
+        $em->flush();
+
+        $team = $this->createTestTeam($challenge, 0);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        // Submit the correct flag
+        $form = $crawler->selectButton('Valider')->form();
+        $form['flag'] = 'DASH{visible}';
+        $client->submit($form);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('.list-group-item', 'Visible Flag');
+        $this->assertSelectorTextContains('.badge.bg-success', '+50 pts');
+    }
+
+    public function testScoreCardUpdatesAfterSubmission(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $em = $container->get('doctrine')->getManager();
+
+        $challenge = $this->createTestChallenge();
+
+        // Create a flag
+        $flag = new Flag();
+        $flag->setName('Score Flag');
+        $flag->setValue('DASH{score}');
+        $flag->setPoints(200);
+        $flag->setChallenge($challenge);
+        $em->persist($flag);
+        $em->flush();
+
+        $team = $this->createTestTeam($challenge, 100);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        // Submit the correct flag
+        $form = $crawler->selectButton('Valider')->form();
+        $form['flag'] = 'DASH{score}';
+        $client->submit($form);
+
+        $this->assertResponseIsSuccessful();
+        // Score should be 100 + 200 = 300
+        $this->assertSelectorTextContains('.card-body', '300 pts');
     }
 }

@@ -2,7 +2,7 @@
 
 **Epic:** 3 - Flag Submission, Scoring & Leaderboard
 **Priority:** P0 - Critical Path
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -139,13 +139,45 @@ public function dashboard(
 
 ## Definition of Done
 
-- [ ] Submission form added to dashboard
-- [ ] Format hint displays challenge prefix
-- [ ] FlagValidationService called on POST
-- [ ] Submissions persisted (success and failure)
-- [ ] Team score updated on success
-- [ ] Success message with points displayed
-- [ ] Error message displayed on failure
-- [ ] Input cleared on success, retained on failure
-- [ ] Score and rank cards update after submission
-- [ ] Enter key submits form
+- [x] Submission form added to dashboard
+- [x] Format hint displays challenge prefix
+- [x] FlagValidationService called on POST
+- [x] Submissions persisted (success and failure)
+- [x] Team score updated on success
+- [x] Success message with points displayed
+- [x] Error message displayed on failure
+- [x] Input cleared on success, retained on failure
+- [x] Score and rank cards update after submission
+- [x] Enter key submits form
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+Claude Opus 4.5
+
+### File List
+| File | Action |
+|------|--------|
+| `templates/dashboard/index.html.twig` | Modified - Added submission form card with format hint, success/error feedback |
+| `src/Entity/Submission.php` | Modified - Made flag field nullable to allow failed submissions |
+| `tests/Controller/DashboardControllerTest.php` | Modified - Added 7 tests for submission form, fixed selector for empty flags message |
+| `migrations/Version20260111140514.php` | Created - Migration for nullable flag_id in submission table |
+
+### Change Log
+- Added "SOUMETTRE UN FLAG" card with input field and "Valider" button to dashboard
+- Added format hint showing challenge prefix (e.g., "Format attendu: DASH{...}")
+- Added inline success/error feedback alerts below the form
+- Made Submission.flag nullable (JoinColumn nullable: true) to persist failed submissions
+- Added `.empty-flags-message` class for test selector specificity
+- Added 7 new tests covering submission form functionality
+
+### Completion Notes
+- Controller logic was already implemented in previous story (3.2)
+- Had to modify Submission entity to make flag nullable - the story requirement to persist failed submissions conflicted with the NOT NULL constraint
+- All 108 tests pass (16 PHPUnit notices are unrelated deprecation warnings)
+- Linting passes for Twig templates and Symfony container
+
+### Debug Log References
+N/A - No significant debugging issues encountered

@@ -41,9 +41,43 @@
     <div class="col-12">
       <div class="card">
         <div class="card-body">
+          <h5 class="card-title">SOUMETTRE UN FLAG</h5>
+          <form method="post">
+            <div class="input-group mb-2">
+              <input type="text"
+                     name="flag"
+                     class="form-control font-monospace"
+                     placeholder="{{ challenge.prefix }}{...}"
+                     value="{{ lastValue }}"
+                     autofocus>
+              <button type="submit" class="btn btn-primary">Valider</button>
+            </div>
+            <small class="text-muted">Format attendu: {{ challenge.prefix }}{...}</small>
+
+            {% if feedback %}
+              {% if feedback.success %}
+                <div class="alert alert-success mt-3 mb-0">
+                  ✅ {{ feedback.message }} +{{ feedback.points }} points
+                </div>
+              {% else %}
+                <div class="alert alert-danger mt-3 mb-0">
+                  ❌ {{ feedback.message }}
+                </div>
+              {% endif %}
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
           <h5 class="card-title">FLAGS VALIDES ({{ validatedFlags|length }}/{{ totalFlags }})</h5>
           {% if validatedFlags is empty %}
-            <p class="text-muted">Aucun flag valide pour le moment</p>
+            <p class="text-muted empty-flags-message">Aucun flag valide pour le moment</p>
           {% else %}
             <ul class="list-group list-group-flush">
               {% for submission in validatedFlags %}
