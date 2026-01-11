@@ -2,7 +2,7 @@
 
 **Epic:** 2 - Team Authentication & Dashboard
 **Priority:** P0 - Critical Path
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -121,10 +121,50 @@ class SecurityController extends AbstractController
 
 ## Definition of Done
 
-- [ ] Team firewall configured in security.yaml
-- [ ] SecurityController with login/logout routes
-- [ ] Login template matching wireframe E1
-- [ ] Error message displays correctly
-- [ ] Redirect to /dashboard on success
-- [ ] /dashboard protected (redirects to /login)
-- [ ] Admin and Team firewalls completely separated
+- [x] Team firewall configured in security.yaml
+- [x] SecurityController with login/logout routes
+- [x] Login template matching wireframe E1
+- [x] Error message displays correctly
+- [x] Redirect to /dashboard on success
+- [x] /dashboard protected (redirects to /login)
+- [x] Admin and Team firewalls completely separated
+
+---
+
+## Dev Agent Record
+
+### File List
+
+| File | Action |
+|------|--------|
+| config/packages/security.yaml | Modified |
+| src/Controller/SecurityController.php | Modified |
+| src/Controller/DashboardController.php | Created |
+| templates/base.html.twig | Modified |
+| templates/security/login.html.twig | Created |
+| templates/security/admin_login.html.twig | Renamed from login.html.twig |
+| templates/dashboard/index.html.twig | Created |
+| tests/Controller/SecurityControllerTest.php | Modified |
+
+### Change Log
+
+- Added `team_provider` to security.yaml for Team entity authentication
+- Configured `main` firewall with form_login for team authentication at `/login`
+- Added access_control rules for `/login` (PUBLIC_ACCESS) and `/dashboard` (ROLE_TEAM)
+- Added team `login()` and `logout()` routes to SecurityController
+- Renamed admin template to `admin_login.html.twig` to separate from team login
+- Created team login template with Bootstrap styling matching wireframe E1
+- Added Bootstrap CSS via CDN to base.html.twig
+- Created DashboardController with protected `/dashboard` route
+- Created dashboard template with logout button
+- Added 7 team authentication tests covering all acceptance criteria
+
+### Completion Notes
+
+- All 50 tests pass (43 existing + 7 new team auth tests)
+- Admin and Team firewalls are completely separated
+- Team login uses `main` firewall, Admin login uses `admin` firewall
+
+### Agent Model Used
+
+Claude Opus 4.5

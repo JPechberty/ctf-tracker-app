@@ -7,6 +7,10 @@ security:
             entity:
                 class: App\Entity\Admin
                 property: username
+        team_provider:
+            entity:
+                class: App\Entity\Team
+                property: username
 
     firewalls:
         dev:
@@ -26,10 +30,21 @@ security:
                 target: admin_login
         main:
             lazy: true
+            provider: team_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: app_dashboard
+                enable_csrf: true
+            logout:
+                path: app_logout
+                target: app_login
 
     access_control:
         - { path: ^/admin/login$, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/dashboard, roles: ROLE_TEAM }
 
 when@test:
     security:
