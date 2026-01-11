@@ -2,7 +2,7 @@
 
 **Epic:** 3 - Flag Submission, Scoring & Leaderboard
 **Priority:** P0 - Critical Path
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -137,13 +137,38 @@ class FlagValidationService
 
 ## Definition of Done
 
-- [ ] ValidationResult DTO created
-- [ ] FlagValidationService created in src/Service/
-- [ ] All 6 controls implemented in order
-- [ ] Unit test for Control 1 (challenge not active)
-- [ ] Unit test for Control 2 (invalid format)
-- [ ] Unit test for Control 3 (flag not found)
-- [ ] Unit test for Control 4 (flag wrong challenge)
-- [ ] Unit test for Control 5 (already validated)
-- [ ] Unit test for Control 6 (value mismatch)
-- [ ] Unit test for success case
+- [x] ValidationResult DTO created
+- [x] FlagValidationService created in src/Service/
+- [x] All 6 controls implemented in order
+- [x] Unit test for Control 1 (challenge not active)
+- [x] Unit test for Control 2 (invalid format)
+- [x] Unit test for Control 3 (flag not found)
+- [x] Unit test for Control 4 (flag wrong challenge)
+- [x] Unit test for Control 5 (already validated)
+- [x] Unit test for Control 6 (value mismatch)
+- [x] Unit test for success case
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+Claude Opus 4.5
+
+### File List
+| File | Action |
+|------|--------|
+| src/DTO/ValidationResult.php | Created |
+| src/Service/FlagValidationService.php | Created |
+| tests/Service/FlagValidationServiceTest.php | Created |
+
+### Change Log
+- Created ValidationResult DTO with success/failure factory methods
+- Created FlagValidationService with 6 validation controls in order
+- Control 1: Challenge active check
+- Control 2: Format validation (PREFIX{...})
+- Control 3: Flag exists check
+- Control 4: Flag belongs to challenge check (combined with Control 3)
+- Control 5: Not already validated check
+- Control 6: Exact value match (handled by findOneBy)
+- Added 11 unit tests covering all failure cases + success cases + custom prefix
