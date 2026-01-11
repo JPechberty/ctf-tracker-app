@@ -42,9 +42,14 @@ class Challenge
     #[ORM\OneToMany(targetEntity: Flag::class, mappedBy: 'challenge', cascade: ['persist', 'remove'])]
     private Collection $flags;
 
+    /** @var Collection<int, Team> */
+    #[ORM\OneToMany(targetEntity: Team::class, mappedBy: 'challenge')]
+    private Collection $teams;
+
     public function __construct()
     {
         $this->flags = new ArrayCollection();
+        $this->teams = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -156,6 +161,35 @@ class Challenge
         if ($this->flags->removeElement($flag)) {
             if ($flag->getChallenge() === $this) {
                 $flag->setChallenge(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Team>
+     */
+    public function getTeams(): Collection
+    {
+        return $this->teams;
+    }
+
+    public function addTeam(Team $team): static
+    {
+        if (!$this->teams->contains($team)) {
+            $this->teams->add($team);
+            $team->setChallenge($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTeam(Team $team): static
+    {
+        if ($this->teams->removeElement($team)) {
+            if ($team->getChallenge() === $this) {
+                $team->setChallenge(null);
             }
         }
 
