@@ -2,6 +2,20 @@
 
 {% block title %}Dashboard - {{ team.name }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        @media (max-width: 767px) {
+            .display-4 {
+                font-size: 2rem;
+            }
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <nav class="navbar navbar-light bg-light sticky-top">
   <div class="container">
@@ -39,35 +53,56 @@
 
   <div class="row mt-4">
     <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">SOUMETTRE UN FLAG</h5>
-          <form method="post">
-            <div class="input-group mb-2">
-              <input type="text"
-                     name="flag"
-                     class="form-control font-monospace"
-                     placeholder="{{ challenge.prefix }}{...}"
-                     value="{{ lastValue }}"
-                     autofocus>
-              <button type="submit" class="btn btn-primary">Valider</button>
-            </div>
-            <small class="text-muted">Format attendu: {{ challenge.prefix }}{...}</small>
-
-            {% if feedback %}
-              {% if feedback.success %}
-                <div class="alert alert-success mt-3 mb-0">
-                  ✅ {{ feedback.message }} +{{ feedback.points }} points
-                </div>
-              {% else %}
-                <div class="alert alert-danger mt-3 mb-0">
-                  ❌ {{ feedback.message }}
-                </div>
-              {% endif %}
-            {% endif %}
-          </form>
+      {% if challenge.isUpcoming %}
+        <div class="alert alert-info text-center">
+          <h4>⏳ CHALLENGE A VENIR</h4>
+          <p>Le challenge commence dans:</p>
+          <span class="badge bg-dark fs-4 font-monospace"
+                data-controller="timer"
+                data-timer-end-time-value="{{ challenge.startDate.timestamp }}"
+                data-timer-start-time-value="{{ challenge.startDate.timestamp }}">
+            --:--:--
+          </span>
         </div>
-      </div>
+      {% elseif challenge.isEnded %}
+        <div class="alert alert-secondary text-center">
+          <h4>⏱️ CHALLENGE TERMINE</h4>
+          <p>Consultez le classement final</p>
+          <a href="{{ path('app_leaderboard') }}" class="btn btn-primary">
+            🏆 Voir le leaderboard
+          </a>
+        </div>
+      {% else %}
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">SOUMETTRE UN FLAG</h5>
+            <form method="post">
+              <div class="input-group mb-2">
+                <input type="text"
+                       name="flag"
+                       class="form-control font-monospace"
+                       placeholder="{{ challenge.prefix }}{...}"
+                       value="{{ lastValue }}"
+                       autofocus>
+                <button type="submit" class="btn btn-primary">Valider</button>
+              </div>
+              <small class="text-muted">Format attendu: {{ challenge.prefix }}{...}</small>
+
+              {% if feedback %}
+                {% if feedback.success %}
+                  <div class="alert alert-success mt-3 mb-0">
+                    ✅ {{ feedback.message }} +{{ feedback.points }} points
+                  </div>
+                {% else %}
+                  <div class="alert alert-danger mt-3 mb-0">
+                    ❌ {{ feedback.message }}
+                  </div>
+                {% endif %}
+              {% endif %}
+            </form>
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 

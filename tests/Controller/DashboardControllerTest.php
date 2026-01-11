@@ -481,4 +481,146 @@ class DashboardControllerTest extends WebTestCase
         // Score should be 100 + 200 = 300
         $this->assertSelectorTextContains('.card-body', '300 pts');
     }
+
+    // Story 3.5 Tests - Challenge States
+
+    private function createUpcomingChallenge(): Challenge
+    {
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $challenge = new Challenge();
+        $challenge->setName('Upcoming Challenge ' . uniqid());
+        $challenge->setPrefix('UP');
+        $challenge->setStartDate(new \DateTimeImmutable('+1 hour'));
+        $challenge->setEndDate(new \DateTimeImmutable('+2 hours'));
+
+        $entityManager->persist($challenge);
+        $entityManager->flush();
+
+        return $challenge;
+    }
+
+    private function createEndedChallenge(): Challenge
+    {
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $challenge = new Challenge();
+        $challenge->setName('Ended Challenge ' . uniqid());
+        $challenge->setPrefix('END');
+        $challenge->setStartDate(new \DateTimeImmutable('-2 hours'));
+        $challenge->setEndDate(new \DateTimeImmutable('-1 hour'));
+
+        $entityManager->persist($challenge);
+        $entityManager->flush();
+
+        return $challenge;
+    }
+
+    public function testDashboardShowsUpcomingMessage(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createUpcomingChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('.alert-info', 'CHALLENGE A VENIR');
+        $this->assertSelectorTextContains('.alert-info', 'Le challenge commence dans');
+    }
+
+    public function testDashboardHidesSubmissionFormWhenUpcoming(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createUpcomingChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        // Form should not exist
+        $form = $crawler->filter('form input[name="flag"]');
+        $this->assertCount(0, $form);
+    }
+
+    public function testDashboardShowsEndedMessage(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createEndedChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('.alert-secondary', 'CHALLENGE TERMINE');
+        $this->assertSelectorTextContains('.alert-secondary', 'Consultez le classement final');
+    }
+
+    public function testDashboardHidesSubmissionFormWhenEnded(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createEndedChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        // Form should not exist
+        $form = $crawler->filter('form input[name="flag"]');
+        $this->assertCount(0, $form);
+    }
+
+    public function testDashboardShowsLeaderboardLinkWhenEnded(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createEndedChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('.alert-secondary a[href="/leaderboard"]');
+    }
+
+    public function testDashboardShowsSubmissionFormWhenActive(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge(); // Active challenge
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        // Form should exist
+        $form = $crawler->filter('form input[name="flag"]');
+        $this->assertCount(1, $form);
+        // No state alerts should appear
+        $this->assertSelectorNotExists('.alert-info h4');
+        $this->assertSelectorNotExists('.alert-secondary h4');
+    }
+
+    public function testDashboardUpcomingHasCountdownTimer(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createUpcomingChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+
+        // Check for countdown timer in the upcoming message
+        $timer = $crawler->filter('.alert-info [data-controller="timer"]');
+        $this->assertCount(1, $timer);
+        $this->assertEquals($challenge->getStartDate()->getTimestamp(), $timer->attr('data-timer-end-time-value'));
+    }
 }

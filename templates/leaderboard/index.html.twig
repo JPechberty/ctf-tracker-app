@@ -14,6 +14,21 @@
                 padding: 1rem 1.5rem;
             }
         }
+        /* Mobile optimizations */
+        @media (max-width: 767px) {
+            .display-5 {
+                font-size: 1.5rem;
+            }
+            .table td, .table th {
+                padding: 0.5rem;
+            }
+            .leaderboard-table .fs-4 {
+                font-size: 1.25rem !important;
+            }
+            .leaderboard-table .fs-5 {
+                font-size: 1rem !important;
+            }
+        }
     </style>
 {% endblock %}
 
@@ -29,40 +44,59 @@
         </span>
     </div>
 
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0 leaderboard-table">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="text-center" style="width: 80px">Rang</th>
-                        <th>Equipe</th>
-                        <th class="text-end" style="width: 120px">Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in rankedTeams %}
-                    <tr>
-                        <td class="text-center fs-4">
-                            {% if entry.rank == 1 %}🥇
-                            {% elseif entry.rank == 2 %}🥈
-                            {% elseif entry.rank == 3 %}🥉
-                            {% else %}#{{ entry.rank }}
-                            {% endif %}
-                        </td>
-                        <td class="fs-5">{{ entry.team.name }}</td>
-                        <td class="text-end font-monospace fs-5">{{ entry.team.score }} pts</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3" class="text-center text-muted py-4">
-                            Aucune equipe inscrite
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {% if challenge.isUpcoming %}
+        <div class="alert alert-info text-center">
+            <h4>⏳ Challenge a venir</h4>
+            <p>Le classement sera affiche au demarrage du challenge</p>
+            <span class="badge bg-dark fs-4 font-monospace"
+                  data-controller="timer"
+                  data-timer-end-time-value="{{ challenge.startDate.timestamp }}"
+                  data-timer-start-time-value="{{ challenge.startDate.timestamp }}">
+                --:--:--
+            </span>
         </div>
-    </div>
+    {% else %}
+        {% if challenge.isEnded %}
+            <div class="alert alert-secondary text-center mb-4">
+                <strong>⏱️ CHALLENGE TERMINE - Classement final</strong>
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 leaderboard-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="text-center" style="width: 80px">Rang</th>
+                            <th>Equipe</th>
+                            <th class="text-end" style="width: 120px">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in rankedTeams %}
+                        <tr>
+                            <td class="text-center fs-4">
+                                {% if entry.rank == 1 %}🥇
+                                {% elseif entry.rank == 2 %}🥈
+                                {% elseif entry.rank == 3 %}🥉
+                                {% else %}#{{ entry.rank }}
+                                {% endif %}
+                            </td>
+                            <td class="fs-5">{{ entry.team.name }}</td>
+                            <td class="text-end font-monospace fs-5">{{ entry.team.score }} pts</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                Aucune equipe inscrite
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
 
     <div class="d-flex justify-content-between align-items-center mt-4">
         <span class="text-muted">🚩 {{ totalFlags }} flags disponibles</span>

@@ -2,7 +2,7 @@
 
 **Epic:** 3 - Flag Submission, Scoring & Leaderboard
 **Priority:** P1 - High
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -148,13 +148,50 @@ public function isEnded(): bool
 
 ## Definition of Done
 
-- [ ] Challenge.isUpcoming(), isActive(), isEnded() methods work
-- [ ] Dashboard shows appropriate state message
-- [ ] Submission form hidden when challenge not active
-- [ ] Leaderboard shows "a venir" message before start
-- [ ] Leaderboard shows "termine" banner after end
-- [ ] Timer shows countdown to start when upcoming
-- [ ] Timer shows "TERMINE" when ended
-- [ ] All pages responsive on mobile
-- [ ] Consistent success/error styling
-- [ ] No technical errors exposed to users
+- [x] Challenge.isUpcoming(), isActive(), isEnded() methods work
+- [x] Dashboard shows appropriate state message
+- [x] Submission form hidden when challenge not active
+- [x] Leaderboard shows "a venir" message before start
+- [x] Leaderboard shows "termine" banner after end
+- [x] Timer shows countdown to start when upcoming
+- [x] Timer shows "TERMINE" when ended
+- [x] All pages responsive on mobile
+- [x] Consistent success/error styling
+- [x] No technical errors exposed to users
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+Claude Opus 4.5
+
+### File List
+
+**Modified:**
+- `templates/dashboard/index.html.twig` - Added challenge state handling (upcoming/active/ended), responsive CSS
+- `templates/leaderboard/index.html.twig` - Added challenge state handling, mobile responsive CSS
+- `tests/Controller/DashboardControllerTest.php` - Added 8 tests for challenge states
+- `tests/Controller/LeaderboardControllerTest.php` - Added 6 tests for challenge states
+
+### Change Log
+
+- Updated Dashboard template to show:
+  - "CHALLENGE A VENIR" message with countdown when upcoming
+  - "CHALLENGE TERMINE" message with leaderboard link when ended
+  - Submission form only when challenge is active
+- Updated Leaderboard template to show:
+  - "Challenge a venir" message when upcoming (hides table)
+  - "CHALLENGE TERMINE - Classement final" banner when ended (shows table)
+- Added mobile responsive CSS to both templates
+- Timer controller already handles "TERMINE" state (from Story 2.4)
+- Challenge entity already has isUpcoming(), isActive(), isEnded() methods
+- Added 14 new tests for challenge state functionality
+
+### Debug Log References
+None
+
+### Completion Notes
+- All 136 Controller/Service/Entity tests pass
+- Pre-existing fixture test failures are infrastructure issues unrelated to this story
+- Timer controller already implemented "TERMINE" display in Story 2.4

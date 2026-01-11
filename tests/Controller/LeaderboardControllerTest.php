@@ -265,4 +265,121 @@ class LeaderboardControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $this->assertSelectorExists('table.leaderboard-table');
     }
+
+    // Story 3.5 Tests - Challenge States
+
+    private function createUpcomingChallenge(): Challenge
+    {
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $challenge = new Challenge();
+        $challenge->setName('Upcoming LB Challenge ' . uniqid());
+        $challenge->setPrefix('UP');
+        $challenge->setStartDate(new \DateTimeImmutable('+1 hour'));
+        $challenge->setEndDate(new \DateTimeImmutable('+2 hours'));
+
+        $entityManager->persist($challenge);
+        $entityManager->flush();
+
+        return $challenge;
+    }
+
+    private function createEndedChallenge(): Challenge
+    {
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $challenge = new Challenge();
+        $challenge->setName('Ended LB Challenge ' . uniqid());
+        $challenge->setPrefix('END');
+        $challenge->setStartDate(new \DateTimeImmutable('-2 hours'));
+        $challenge->setEndDate(new \DateTimeImmutable('-1 hour'));
+
+        $entityManager->persist($challenge);
+        $entityManager->flush();
+
+        return $challenge;
+    }
+
+    public function testLeaderboardShowsUpcomingMessage(): void
+    {
+        $client = static::createClient();
+        $this->createUpcomingChallenge();
+
+        $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('.alert-info', 'Challenge a venir');
+        $this->assertSelectorTextContains('.alert-info', 'Le classement sera affiche au demarrage du challenge');
+    }
+
+    public function testLeaderboardHidesTableWhenUpcoming(): void
+    {
+        $client = static::createClient();
+        $this->createUpcomingChallenge();
+
+        $crawler = $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+        // Table should not exist when challenge is upcoming
+        $table = $crawler->filter('table.leaderboard-table');
+        $this->assertCount(0, $table);
+    }
+
+    public function testLeaderboardShowsEndedBanner(): void
+    {
+        $client = static::createClient();
+        $this->createEndedChallenge();
+
+        $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('.alert-secondary', 'CHALLENGE TERMINE');
+        $this->assertSelectorTextContains('.alert-secondary', 'Classement final');
+    }
+
+    public function testLeaderboardShowsTableWhenEnded(): void
+    {
+        $client = static::createClient();
+        $this->createEndedChallenge();
+
+        $crawler = $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+        // Table should still exist when challenge is ended
+        $table = $crawler->filter('table.leaderboard-table');
+        $this->assertCount(1, $table);
+    }
+
+    public function testLeaderboardUpcomingHasCountdownTimer(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createUpcomingChallenge();
+
+        $crawler = $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+
+        // Check for countdown timer in the upcoming message
+        $timer = $crawler->filter('.alert-info [data-controller="timer"]');
+        $this->assertCount(1, $timer);
+        $this->assertEquals($challenge->getStartDate()->getTimestamp(), $timer->attr('data-timer-end-time-value'));
+    }
+
+    public function testLeaderboardActiveShowsTable(): void
+    {
+        $client = static::createClient();
+        $this->createTestChallenge(); // Active challenge
+
+        $crawler = $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+        // Table should exist
+        $table = $crawler->filter('table.leaderboard-table');
+        $this->assertCount(1, $table);
+        // No state alerts should appear
+        $this->assertSelectorNotExists('.alert-info h4');
+        $this->assertSelectorNotExists('.alert-secondary');
+    }
 }
