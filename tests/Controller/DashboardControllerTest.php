@@ -174,4 +174,117 @@ class DashboardControllerTest extends WebTestCase
         $client->request('GET', '/dashboard');
         $this->assertResponseRedirects('/login');
     }
+
+    // Story 2.4 Tests
+
+    public function testDashboardHasTimerElement(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+
+        // Check timer element exists with Stimulus controller
+        $timer = $crawler->filter('[data-controller="timer"]');
+        $this->assertCount(1, $timer);
+
+        // Check timer has required data attributes
+        $this->assertNotEmpty($timer->attr('data-timer-end-time-value'));
+        $this->assertNotEmpty($timer->attr('data-timer-start-time-value'));
+    }
+
+    public function testDashboardTimerHasCorrectTimestamps(): void
+    {
+        $client = static::createClient();
+        $container = static::getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+
+        $startDate = new \DateTimeImmutable('+1 hour');
+        $endDate = new \DateTimeImmutable('+2 hours');
+
+        $challenge = new Challenge();
+        $challenge->setName('Timer Test Challenge ' . uniqid());
+        $challenge->setPrefix('TIME');
+        $challenge->setStartDate($startDate);
+        $challenge->setEndDate($endDate);
+
+        $entityManager->persist($challenge);
+        $entityManager->flush();
+
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+
+        $timer = $crawler->filter('[data-controller="timer"]');
+        $this->assertEquals($endDate->getTimestamp(), $timer->attr('data-timer-end-time-value'));
+        $this->assertEquals($startDate->getTimestamp(), $timer->attr('data-timer-start-time-value'));
+    }
+
+    public function testDashboardShowsEmptyFlagsMessage(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('.text-muted', 'Aucun flag valide pour le moment');
+    }
+
+    public function testDashboardShowsFlagsCount(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $crawler = $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+
+        // Check FLAGS VALIDES section exists with count format
+        $flagsCard = $crawler->filter('.card-title:contains("FLAGS VALIDES")');
+        $this->assertCount(1, $flagsCard);
+        $this->assertStringContainsString('(0/', $flagsCard->text());
+    }
+
+    public function testDashboardHasLeaderboardLink(): void
+    {
+        $client = static::createClient();
+        $challenge = $this->createTestChallenge();
+        $team = $this->createTestTeam($challenge);
+
+        $client->loginUser($team, 'main');
+        $client->request('GET', '/dashboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('a[href="/leaderboard"]');
+        $this->assertSelectorTextContains('a[href="/leaderboard"]', 'Voir le leaderboard');
+    }
+
+    public function testLeaderboardPageIsAccessible(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+    }
+
+    public function testLeaderboardHasBackLink(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/leaderboard');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('a[href="/dashboard"]');
+    }
 }

@@ -6,6 +6,12 @@
 <nav class="navbar navbar-light bg-light sticky-top">
   <div class="container">
     <span class="navbar-brand">CTF TRACKER</span>
+    <span class="badge bg-dark fs-6 font-monospace"
+          data-controller="timer"
+          data-timer-end-time-value="{{ challenge.endDate.timestamp }}"
+          data-timer-start-time-value="{{ challenge.startDate.timestamp }}">
+        --:--:--
+    </span>
     <span>{{ team.name }}</span>
     <a href="{{ path('app_logout') }}" class="btn btn-outline-danger btn-sm">Deconnexion</a>
   </div>
@@ -28,6 +34,32 @@
           <p class="display-4 fw-bold">#{{ rank }}</p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">FLAGS VALIDES ({{ validatedFlags|length }}/{{ totalFlags }})</h5>
+          {% if validatedFlags is empty %}
+            <p class="text-muted">Aucun flag valide pour le moment</p>
+          {% else %}
+            <ul class="list-group list-group-flush">
+              {% for submission in validatedFlags %}
+                <li class="list-group-item d-flex justify-content-between">
+                  <span>{{ submission.flag.name }}</span>
+                  <span class="badge bg-success">+{{ submission.flag.points }} pts</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <a href="{{ path('app_leaderboard') }}" class="btn btn-outline-secondary mt-3">
+        Voir le leaderboard
+      </a>
     </div>
   </div>
 </div>

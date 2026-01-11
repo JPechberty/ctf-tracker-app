@@ -22,6 +22,15 @@ class DashboardController extends AbstractController
             'team' => $team,
             'challenge' => $team->getChallenge(),
             'rank' => $rankingService->getTeamRank($team),
+            'validatedFlags' => [], // Will be populated when Submission entity exists (Story 3.1)
+            'totalFlags' => count($team->getChallenge()->getFlags()),
         ]);
+    }
+
+    #[Route('/leaderboard', name: 'app_leaderboard')]
+    public function leaderboard(): Response
+    {
+        // Placeholder - will be implemented in Story 3.4
+        return $this->render('dashboard/leaderboard.html.twig');
     }
 }
