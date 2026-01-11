@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Leaderboard - {{ challenge.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* For projection mode */
+        @media (min-width: 1200px) {
+            .leaderboard-table {
+                font-size: 1.5rem;
+            }
+            .leaderboard-table td, .leaderboard-table th {
+                padding: 1rem 1.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h1 class="display-5">{{ challenge.name }}</h1>
+        <span class="badge bg-dark fs-5 font-monospace"
+              data-controller="timer"
+              data-timer-end-time-value="{{ challenge.endDate.timestamp }}"
+              data-timer-start-time-value="{{ challenge.startDate.timestamp }}">
+            --:--:--
+        </span>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 leaderboard-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center" style="width: 80px">Rang</th>
+                        <th>Equipe</th>
+                        <th class="text-end" style="width: 120px">Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in rankedTeams %}
+                    <tr>
+                        <td class="text-center fs-4">
+                            {% if entry.rank == 1 %}🥇
+                            {% elseif entry.rank == 2 %}🥈
+                            {% elseif entry.rank == 3 %}🥉
+                            {% else %}#{{ entry.rank }}
+                            {% endif %}
+                        </td>
+                        <td class="fs-5">{{ entry.team.name }}</td>
+                        <td class="text-end font-monospace fs-5">{{ entry.team.score }} pts</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">
+                            Aucune equipe inscrite
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <span class="text-muted">🚩 {{ totalFlags }} flags disponibles</span>
+        <div>
+            <a href="{{ path('app_dashboard') }}" class="btn btn-outline-primary me-2">
+                Dashboard
+            </a>
+            <a href="{{ path('app_leaderboard') }}" class="btn btn-outline-secondary">
+                🔄 Actualiser
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

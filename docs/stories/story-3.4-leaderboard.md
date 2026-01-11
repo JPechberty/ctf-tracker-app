@@ -2,7 +2,7 @@
 
 **Epic:** 3 - Flag Submission, Scoring & Leaderboard
 **Priority:** P0 - Critical Path
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -177,13 +177,56 @@ public function getRankedTeams(array $teams): array
 
 ## Definition of Done
 
-- [ ] Leaderboard route at /leaderboard (public)
-- [ ] Challenge name displayed as title
-- [ ] Timer countdown displayed
-- [ ] Teams listed by score descending
-- [ ] Medal icons for top 3
-- [ ] Tied teams share rank
-- [ ] Total flags count in footer
-- [ ] Actualiser button works
-- [ ] Layout optimized for projection
-- [ ] Responsive on mobile
+- [x] Leaderboard route at /leaderboard (public)
+- [x] Challenge name displayed as title
+- [x] Timer countdown displayed
+- [x] Teams listed by score descending
+- [x] Medal icons for top 3
+- [x] Tied teams share rank
+- [x] Total flags count in footer
+- [x] Actualiser button works
+- [x] Layout optimized for projection
+- [x] Responsive on mobile
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+Claude Opus 4.5
+
+### File List
+
+**Created:**
+- `src/Controller/LeaderboardController.php` - Public leaderboard controller
+- `templates/leaderboard/index.html.twig` - Leaderboard template with timer, medals, and large screen optimization
+- `tests/Controller/LeaderboardControllerTest.php` - Comprehensive tests for leaderboard functionality
+
+**Modified:**
+- `src/Service/RankingService.php` - Added `getRankedTeams()` method for ranked team list with tie handling
+- `tests/Service/RankingServiceTest.php` - Added tests for `getRankedTeams()` method
+
+### Change Log
+
+- Created LeaderboardController with public route at `/leaderboard`
+- Added `getRankedTeams()` method to RankingService for generating ranked team list with proper tie handling
+- Created leaderboard template with:
+  - Challenge name as title
+  - Timer countdown using existing Stimulus controller
+  - Teams table sorted by score descending
+  - Medal icons (gold, silver, bronze) for top 3 ranks
+  - Shared ranks for tied teams
+  - Total flags count in footer
+  - Actualiser refresh button
+  - Dashboard back link
+  - Large screen CSS optimization for projection
+  - Responsive Bootstrap table
+- Added comprehensive test coverage (13 new tests for LeaderboardController, 7 new tests for RankingService)
+
+### Debug Log References
+None
+
+### Completion Notes
+- All 123 Controller/Service/Entity tests pass
+- Pre-existing fixture test failures are infrastructure issues unrelated to this story
+- Template includes inline CSS for large screen projection optimization

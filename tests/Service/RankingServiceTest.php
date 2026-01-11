@@ -131,4 +131,110 @@ class RankingServiceTest extends TestCase
         $this->assertEquals(2, $service->getTeamRank($team2));
         $this->assertEquals(2, $service->getTeamRank($team3));
     }
+
+    // Tests for getRankedTeams method
+
+    public function testGetRankedTeamsWithEmptyArray(): void
+    {
+        $teamRepo = $this->createMock(TeamRepository::class);
+        $service = new RankingService($teamRepo);
+
+        $result = $service->getRankedTeams([]);
+
+        $this->assertEmpty($result);
+    }
+
+    public function testGetRankedTeamsWithSingleTeam(): void
+    {
+        $challenge = $this->createChallenge();
+        $team = $this->createTeam(1, 'Team Alpha', 100, $challenge);
+
+        $teamRepo = $this->createMock(TeamRepository::class);
+        $service = new RankingService($teamRepo);
+
+        $result = $service->getRankedTeams([$team]);
+
+        $this->assertCount(1, $result);
+        $this->assertEquals(1, $result[0]['rank']);
+        $this->assertSame($team, $result[0]['team']);
+    }
+
+    public function testGetRankedTeamsWithMultipleTeams(): void
+    {
+        $challenge = $this->createChallenge();
+        $team1 = $this->createTeam(1, 'Team Alpha', 300, $challenge);
+        $team2 = $this->createTeam(2, 'Team Beta', 200, $challenge);
+        $team3 = $this->createTeam(3, 'Team Gamma', 100, $challenge);
+
+        $teams = [$team1, $team2, $team3];
+
+        $teamRepo = $this->createMock(TeamRepository::class);
+        $service = new RankingService($teamRepo);
+
+        $result = $service->getRankedTeams($teams);
+
+        $this->assertCount(3, $result);
+        $this->assertEquals(1, $result[0]['rank']);
+        $this->assertEquals(2, $result[1]['rank']);
+        $this->assertEquals(3, $result[2]['rank']);
+    }
+
+    public function testGetRankedTeamsWithTies(): void
+    {
+        $challenge = $this->createChallenge();
+        $team1 = $this->createTeam(1, 'Team Alpha', 300, $challenge);
+        $team2 = $this->createTeam(2, 'Team Beta', 200, $challenge);
+        $team3 = $this->createTeam(3, 'Team Gamma', 200, $challenge);
+        $team4 = $this->createTeam(4, 'Team Delta', 100, $challenge);
+
+        $teams = [$team1, $team2, $team3, $team4];
+
+        $teamRepo = $this->createMock(TeamRepository::class);
+        $service = new RankingService($teamRepo);
+
+        $result = $service->getRankedTeams($teams);
+
+        $this->assertCount(4, $result);
+        $this->assertEquals(1, $result[0]['rank']); // 300 pts
+        $this->assertEquals(2, $result[1]['rank']); // 200 pts (tied)
+        $this->assertEquals(2, $result[2]['rank']); // 200 pts (tied)
+        $this->assertEquals(4, $result[3]['rank']); // 100 pts (rank 4, skips 3)
+    }
+
+    public function testGetRankedTeamsWithAllTied(): void
+    {
+        $challenge = $this->createChallenge();
+        $team1 = $this->createTeam(1, 'Team Alpha', 100, $challenge);
+        $team2 = $this->createTeam(2, 'Team Beta', 100, $challenge);
+        $team3 = $this->createTeam(3, 'Team Gamma', 100, $challenge);
+
+        $teams = [$team1, $team2, $team3];
+
+        $teamRepo = $this->createMock(TeamRepository::class);
+        $service = new RankingService($teamRepo);
+
+        $result = $service->getRankedTeams($teams);
+
+        $this->assertCount(3, $result);
+        $this->assertEquals(1, $result[0]['rank']);
+        $this->assertEquals(1, $result[1]['rank']);
+        $this->assertEquals(1, $result[2]['rank']);
+    }
+
+    public function testGetRankedTeamsPreservesTeamOrder(): void
+    {
+        $challenge = $this->createChallenge();
+        $team1 = $this->createTeam(1, 'Team Alpha', 300, $challenge);
+        $team2 = $this->createTeam(2, 'Team Beta', 200, $challenge);
+
+        $teams = [$team1, $team2];
+
+        $teamRepo = $this->createMock(TeamRepository::class);
+        $service = new RankingService($teamRepo);
+
+        $result = $service->getRankedTeams($teams);
+
+        $this->assertSame($team1, $result[0]['team']);
+        $this->assertSame($team2, $result[1]['team']);
+    }
 }
