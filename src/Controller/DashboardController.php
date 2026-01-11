@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Team;
+use App\Repository\SubmissionRepository;
 use App\Service\RankingService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +14,7 @@ class DashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_dashboard')]
     #[IsGranted('ROLE_TEAM')]
-    public function index(RankingService $rankingService): Response
+    public function index(RankingService $rankingService, SubmissionRepository $submissionRepository): Response
     {
         /** @var Team $team */
         $team = $this->getUser();
@@ -22,7 +23,7 @@ class DashboardController extends AbstractController
             'team' => $team,
             'challenge' => $team->getChallenge(),
             'rank' => $rankingService->getTeamRank($team),
-            'validatedFlags' => [], // Will be populated when Submission entity exists (Story 3.1)
+            'validatedFlags' => $submissionRepository->findValidatedByTeam($team),
             'totalFlags' => count($team->getChallenge()->getFlags()),
         ]);
     }

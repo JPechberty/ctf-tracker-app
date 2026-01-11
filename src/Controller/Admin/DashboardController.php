@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Challenge;
 use App\Entity\Flag;
+use App\Entity\Submission;
 use App\Entity\Team;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -33,5 +34,6 @@ class DashboardController extends AbstractDashboardController
         yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Challenges', 'fa fa-trophy', Challenge::class);
         yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Flags', 'fa fa-flag', Flag::class);
         yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Teams', 'fa fa-users', Team::class);
+        yield \EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem::linkToCrud('Submissions', 'fa fa-paper-plane', Submission::class);
     }
 }

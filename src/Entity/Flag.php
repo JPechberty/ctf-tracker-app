@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\FlagRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -30,6 +32,15 @@ class Flag
     #[ORM\ManyToOne(inversedBy: 'flags')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Challenge $challenge = null;
+
+    /** @var Collection<int, Submission> */
+    #[ORM\OneToMany(targetEntity: Submission::class, mappedBy: 'flag')]
+    private Collection $submissions;
+
+    public function __construct()
+    {
+        $this->submissions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -82,5 +93,13 @@ class Flag
         $this->challenge = $challenge;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Submission>
+     */
+    public function getSubmissions(): Collection
+    {
+        return $this->submissions;
     }
 }

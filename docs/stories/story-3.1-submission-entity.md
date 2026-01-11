@@ -2,7 +2,7 @@
 
 **Epic:** 3 - Flag Submission, Scoring & Leaderboard
 **Priority:** P0 - Critical Path
-**Status:** Ready for Development
+**Status:** Ready for Review
 
 ---
 
@@ -120,10 +120,43 @@ class SubmissionCrudController extends AbstractCrudController
 
 ## Definition of Done
 
-- [ ] Submission entity created with all fields
-- [ ] ManyToOne relationships with Team and Flag configured
-- [ ] submittedAt auto-set in constructor
-- [ ] Index idx_submission_team_flag_success created
-- [ ] SubmissionCrudController created (read-only)
-- [ ] Filtering works in EasyAdmin
-- [ ] Migration created and applied
+- [x] Submission entity created with all fields
+- [x] ManyToOne relationships with Team and Flag configured
+- [x] submittedAt auto-set in constructor
+- [x] Index idx_submission_team_flag_success created
+- [x] SubmissionCrudController created (read-only)
+- [x] Filtering works in EasyAdmin
+- [x] Migration created and applied
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+Claude Opus 4.5
+
+### File List
+| File | Action |
+|------|--------|
+| src/Entity/Submission.php | Created |
+| src/Repository/SubmissionRepository.php | Created |
+| src/Entity/Team.php | Modified |
+| src/Entity/Flag.php | Modified |
+| src/Controller/Admin/SubmissionCrudController.php | Created |
+| src/Controller/Admin/DashboardController.php | Modified |
+| src/Controller/DashboardController.php | Modified |
+| migrations/Version20260111113226.php | Created |
+| tests/Entity/SubmissionTest.php | Created |
+| tests/Controller/Admin/SubmissionCrudControllerTest.php | Created |
+
+### Change Log
+- Created Submission entity with id, team, flag, submittedValue, success, submittedAt fields
+- Added submissions collection to Team entity (OneToMany inverse)
+- Added submissions collection to Flag entity (OneToMany inverse)
+- Created SubmissionRepository with findValidatedByTeam() method
+- Created read-only SubmissionCrudController (NEW/EDIT/DELETE disabled)
+- Added filters for team, flag, success in EasyAdmin
+- Added Submissions menu item to admin dashboard
+- Updated DashboardController to use SubmissionRepository for validated flags
+- Created migration with idx_submission_team_flag_success index
+- Added 13 new tests (6 entity + 7 controller)
